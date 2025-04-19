@@ -50,3 +50,7 @@ class UserLoginSerializer(serializers.Serializer):
 
 class OTPSendSerializer(serializers.Serializer):
     phone_number = serializers.CharField(required=True)
+
+
+class OTPVerifySerializer(serializers.Serializer):
+    otp = serializers.CharField(required=True)

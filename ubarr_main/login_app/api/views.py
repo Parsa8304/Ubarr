@@ -1,8 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, OTPSendSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, OTPSendSerializer, OTPVerifySerializer
 from rest_framework.permissions import AllowAny
-from django.utils import timezone
 from django.core.cache import cache
 import random
 from .utility import send_sms
@@ -58,7 +57,7 @@ class UserLoginView(generics.GenericAPIView):
     
 
 
-class OTPView(generics.GenericAPIView):
+class OTPSendView(generics.GenericAPIView):
     serializer_class = OTPSendSerializer
 
     def post(self, request):
@@ -82,3 +81,19 @@ class OTPView(generics.GenericAPIView):
             return Response({"message": "OTP verified successfully"}, status=status.HTTP_200_OK)
 
         return Response({"error": "Invalid or expired OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OTPVerifyView(generics.GenericAPIView):
+    serializer_class = OTPVerifySerializer
+    
+    def post(self, request):
+        # Verifying OTP
+        phone_number = request.data.get('phone_number')
+        code = request.data.get('code')
+        cached_code = cache.get(f"otp_{phone_number}")
+
+        if cached_code and cached_code == code:
+            return Response({"message": "OTP verified successfully"}, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid or expired OTP"}, status=status.HTTP_400_BAD_REQUEST)
+    
